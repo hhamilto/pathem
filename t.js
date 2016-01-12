@@ -1,4 +1,5 @@
 _ = require('lodash')
+debug = false
 
 stringify = function(board){
 	return board.join('\n')
@@ -35,7 +36,7 @@ getAllDirectionLocations = function(board,coord){
 }
 getLocations = function(board, coord, nextLetter){
 	var directionLocations = getAllDirectionLocations(board,coord)
-	console.log(directionLocations)
+	debug&&console.log(directionLocations)
 	if(_.includes(_.flatten(board), nextLetter)){
 		var l
 		while(l = directionLocations.pop())
@@ -50,13 +51,13 @@ getLocations = function(board, coord, nextLetter){
 }
 
 solve = function(board, word, coord){
-	console.log('solving: '+word)
-	console.log(stringify(board))
-	console.log()
+	debug&&console.log('solving: '+word)
+	debug&&console.log(stringify(board))
+	debug&&console.log()
 	if(memo[key(board, word)])
 		return memo[key(board, word)]
 	if(word.length == 0)
-		return board
+		return [[coord],board]
 	var nextLetter = word.shift()
 	var potentialLocations = getLocations(board, coord, nextLetter)
 	while(potentialLocations.length>0){
@@ -64,8 +65,10 @@ solve = function(board, word, coord){
 		var newBoard = cloneBoard(board)
 		newBoard[l[0]][l[1]] = nextLetter
 		var ans = solve(newBoard, word.slice(), l)
-		if(ans)
+		if(ans){
+			ans[0].unshift(l)
 			return ans
+		}
 	}
 	memo[key(board, word)] = false
 	return false
@@ -89,6 +92,8 @@ process.stdin.on('end', () => {
 	
 	solution = solve(problem[0], problem[1], undefined)
 
-	console.log(stringify(solution))
+	console.log(stringify(solution[1]))
+	console.log()
+	console.log(solution[0].join('\n'))
 
 })
